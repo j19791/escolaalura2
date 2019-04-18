@@ -1,5 +1,6 @@
 package br.com.alura.escolalura.models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,9 +45,18 @@ public class Aluno {
 	public void setNotas(List<Nota> notas) {
 		this.notas = notas;
 	}
+	
+	
 	public List<Habilidade> getHabilidades() {
-		return habilidades;
-	}
+		//se o atributo de habilidades do aluno for nulo? Teremos uma exceção por que estaremos tentando adicionar uma habilidade ao nulo
+		
+		if(habilidades == null){
+		    habilidades = new ArrayList<Habilidade>();
+		  }
+		  return habilidades;
+		}
+	
+	
 	public void setHabilidades(List<Habilidade> habilidades) {
 		this.habilidades = habilidades;
 	}
@@ -56,4 +66,12 @@ public class Aluno {
 		setId(new ObjectId());
 		  return this;
 	}
+
+
+	public Aluno adiciona(Aluno aluno, Habilidade habilidade) {
+		  List<Habilidade> habilidades = aluno.getHabilidades();//obter as habilidades ja cadastradas
+		  habilidades.add(habilidade);//adicionar a nova habilidade
+		  aluno.setHabilidades(habilidades);
+		  return aluno;
+		}
 }
