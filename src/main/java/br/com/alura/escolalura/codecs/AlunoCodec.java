@@ -18,6 +18,7 @@ import org.bson.types.ObjectId;
 import br.com.alura.escolalura.models.Aluno;
 import br.com.alura.escolalura.models.Curso;
 import br.com.alura.escolalura.models.Habilidade;
+import br.com.alura.escolalura.models.Nota;
 
 public class AlunoCodec implements CollectibleCodec<Aluno>{
 	
@@ -54,7 +55,17 @@ public class AlunoCodec implements CollectibleCodec<Aluno>{
 			          .append("nivel", habilidade.getNivel()));
 			    }
 			    documento.put("habilidades", habilidadesDocument);//adicionaremos essa listagem de documentos no campo habilidades do nosso aluno
-			  }
+		  }
+		  
+		  List<Nota> notas = aluno.getNotas();
+
+		  if(notas != null) {
+		    List<Double> notasParaSalvar = new ArrayList<>();
+		    for (Nota nota : notas) {
+		      notasParaSalvar.add(nota.getValor()); 
+		    }
+		    documento.put("notas", notasParaSalvar);
+		  } 
 		  
 		  codec.encode(writer, documento, encoder);
 		
@@ -80,6 +91,26 @@ public class AlunoCodec implements CollectibleCodec<Aluno>{
 		  if(curso != null){
 		    String nomeCurso = curso.getString("nome");
 		    aluno.setCurso(new Curso(nomeCurso));
+		  }
+		  
+		  
+		  
+		  List<Double> notasDocument =  (List<Double>) document.get("notas");
+		    if (notasDocument != null) {
+		        List<Nota> notas = new ArrayList<Nota>();
+		        for (Double documentNota : notasDocument) {
+		            notas.add(new Nota(documentNota));
+		        }
+		    aluno.setNotas(notas);
+		    }
+
+		  List<Document> habilidades = (List<Document>) document.get("habilidades");
+		  if(habilidades != null) {
+		    List<Habilidade> habilidadesDoAluno = new ArrayList<>();
+		    for (Document documentHabilidade : habilidades) {
+		      habilidadesDoAluno.add(new Habilidade(documentHabilidade.getString("nome"), documentHabilidade.getString("nivel")));
+		    }
+		    aluno.setHabilidades(habilidadesDoAluno);
 		  }
 
 		  return aluno;

@@ -39,9 +39,14 @@ public class Aluno {
 	public void setCurso(Curso curso) {
 		this.curso = curso;
 	}
+	
 	public List<Nota> getNotas() {
-		return notas;
+		  if(notas == null) {
+		    notas = new ArrayList<Nota>();
+		  }
+		  return notas;
 	}
+	
 	public void setNotas(List<Nota> notas) {
 		this.notas = notas;
 	}
@@ -74,4 +79,11 @@ public class Aluno {
 		  aluno.setHabilidades(habilidades);
 		  return aluno;
 		}
+	
+	public Aluno adicionar(Aluno aluno, Nota nota) {
+	  List<Nota> notas = aluno.getNotas();
+	  notas.add(nota);
+	  aluno.setNotas(notas);
+	  return aluno;
+	}
 }
