@@ -27,6 +27,8 @@ public class AlunoRepository {
 	
 	MongoCollection<Aluno> alunos;
 	
+	MongoClient cliente;
+	
 	public void salvar(Aluno aluno){
 	    
 	    criarConexao();
@@ -38,19 +40,19 @@ public class AlunoRepository {
 	      }else{
 	        alunos.updateOne(Filters.eq("_id", aluno.getId()), new Document("$set", aluno));
 	      }
+	    
+	    fecharConexao();
 	  }
 	
 	public List<Aluno> obterTodosAlunos(){
 		  criarConexao();		  
 
-		  MongoCursor<Aluno> resultado = alunos.find().iterator();
+		  MongoCursor<Aluno> resultados = alunos.find().iterator();
 
-		  List<Aluno> alunosEncontrados = new ArrayList<>();
-		  while(resultado.hasNext()){
-		    Aluno aluno = resultado.next();
-		    alunosEncontrados.add(aluno);
-		  }
+		  List<Aluno> alunosEncontrados = popularAlunos(resultados);
 
+		  fecharConexao();
+		  
 		  return alunosEncontrados;
 		}
 
@@ -64,11 +66,13 @@ public class AlunoRepository {
 
 		  MongoClientOptions options = MongoClientOptions.builder().codecRegistry(registro).build();
 
-		  MongoClient cliente = new MongoClient("localhost:27017", options);
+		  this.cliente = new MongoClient("localhost:27017", options);
 		  this.bancoDeDados = cliente.getDatabase("test");
 		  
 		  this.alunos = bancoDeDados.getCollection("alunos", Aluno.class);//estamos deixando o tipo explícito, e queremos uma coleção de Aluno. é preciso criar este codec para que o Mongo consiga traduzir um documento "aluno", para um objeto aluno
 		
+		  
+		  
 	}
 
 	public Aluno obterAlunoPor(String id) {
@@ -76,7 +80,56 @@ public class AlunoRepository {
 		  //MongoCollection<Aluno> alunos = this.bancoDeDados.getCollection("alunos", Aluno.class);
 		  //além de fazer a busca com o filtro, estamos retornando apenas seu primeiro resultado.
 		  Aluno aluno = alunos.find(Filters.eq("_id", new ObjectId(id))).first();
+		  
+		  fecharConexao();
+		  
 		  return aluno;
+	}
+
+	public List<Aluno> pesquisarPor(String nome) {
+		criarConexao();
+
+		//Estamos filtrando a coleção com base no nome recebido como argumento, a partir do qual recuperamos um iterador.
+
+		  MongoCursor<Aluno> resultados = alunos.find(Filters.eq("nome", nome), Aluno.class).iterator();
+		  
+		  
+		  List<Aluno> alunos = popularAlunos(resultados);
+
+		  fecharConexao();
+
+		  return alunos;
+	}
+	
+	private List<Aluno> popularAlunos(MongoCursor<Aluno> resultados) {
+		  List<Aluno> alunos = new ArrayList<>();
+
+		  while(resultados.hasNext()) {
+		    alunos.add(resultados.next());
+		  }
+		  return alunos;
+		}
+	
+	private void fecharConexao() {
+		  this.cliente.close();
+		}
+
+	public List<Aluno> pesquisarPor(String classificacao, Double nota) {
+		criarConexao();
+		  //MongoCollection<Aluno> alunoCollection = this.bancoDeDados.getCollection("alunos", Aluno.class);
+		  MongoCursor<Aluno> resultados = null;
+
+		  if(classificacao.equals("reprovados")) {
+		    resultados = alunos.find(Filters.lt("notas", nota)).iterator();
+		  }else if(classificacao.equals("aprovados")) {
+		    resultados = alunos.find(Filters.gte("notas", nota)).iterator();
+		  }
+
+		  List<Aluno> alunos = popularAlunos(resultados);
+
+		  fecharConexao();
+
+		  return alunos;
 	}
 	
 }
