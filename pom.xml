@@ -44,6 +44,12 @@
     <artifactId>mongodb-driver</artifactId>
     <version>3.5.0</version>
 </dependency>
+
+<dependency>
+  <groupId>com.google.maps</groupId>
+  <artifactId>google-maps-services</artifactId>
+  <version>0.1.20</version>
+</dependency>
 		
 	</dependencies>
 

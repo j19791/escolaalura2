@@ -86,4 +86,13 @@ public class Aluno {
 	  aluno.setNotas(notas);
 	  return aluno;
 	}
+	
+	public Contato getContato() {
+		return contato;
+	}
+	public void setContato(Contato contato) {
+		this.contato = contato;
+	}
+	private Contato contato;
+	
 }

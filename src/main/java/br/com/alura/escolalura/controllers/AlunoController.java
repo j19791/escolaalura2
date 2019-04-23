@@ -1,5 +1,6 @@
 package br.com.alura.escolalura.controllers;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.maps.errors.ApiException;
+
 import br.com.alura.escolalura.models.Aluno;
 import br.com.alura.escolalura.repositories.AlunoRepository;
+import br.com.alura.escolalura.services.GeolocalizacaoService;
 
 
 
@@ -22,7 +26,8 @@ public class AlunoController {
 	@Autowired
 	private AlunoRepository repositorio;
 	
-
+	@Autowired
+	  private GeolocalizacaoService geolocalizacaoService;
 
 	@GetMapping("aluno/cadastrar")
 	public String cadastrar(Model model) {
@@ -36,8 +41,20 @@ public class AlunoController {
 	
 	@PostMapping("/aluno/salvar") //metodo recebera requisições do tipo post
 	public String salvar(@ModelAttribute Aluno aluno){//para recebermos o objeto aluno enviado pelo formulário
-	  System.out.println(aluno);
-		repositorio.salvar(aluno);
+	  
+		List<Double> latELong;
+		try {
+			latELong = geolocalizacaoService.obterLatELongPor(aluno.getContato());
+			aluno.getContato().setCoordinates(latELong);
+			repositorio.salvar(aluno);
+		} catch (ApiException | InterruptedException | IOException e) {
+			System.out.println("Endereco nao localizado");
+			e.printStackTrace();
+		}
+	    
+		
+		
+		
 	  return "redirect:/";//redirecionará  a pagina principal da app
 	}
 	
